@@ -1,0 +1,40 @@
+---
+defaultBaseImageVersion: latest
+stages:
+- name: BUILD
+  inputs:
+  - type: git
+    branch: master
+    service: ${GIT_REPO}
+  triggers:
+  - type: commit
+  properties:
+  - name: LOGICAL_APP_NAME
+    value: ${APP_NAME}
+    type: text
+  - name: BUILD_PREFIX
+    value: master
+    type: text
+  jobs:
+  - name: Maven build & test
+    type: builder
+    artifact_dir: ''
+    build_type: maven
+    enable_tests: true
+    test_file_pattern: target/surefire-reports/TEST-*.xml
+    script: |+
+      #!/bin/bash
+      # set -x
+      echo "Building Java..."
+      echo "Unsetting LOG_DIR env var (used during Java build to check if server started)"
+      echo "LOG_DIR: ${LOG_DIR}"
+      LOG_DIR_TEMP=$LOG_DIR
+      unset LOG_DIR
+      echo "LOG_DIR has been unset: ${LOG_DIR}"
+
+      mvn -N io.takari:maven:wrapper -Dmaven=3.5.0
+      ./mvnw install
+
+      echo "Java build finished, setting LOG_DIR back to original"
+      LOG_DIR=$LOG_DIR_TEMP
+      echo "LOG_DIR: ${LOG_DIR}"
