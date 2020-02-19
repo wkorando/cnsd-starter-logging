@@ -31,8 +31,8 @@ services:
       type: maven
       user_id: 'admin'
       token: 'changeit'
-      release_url: 'url_to_your_artifactory_instance/artifactory/libs_release'
-      snapshot_url: 'url_to_your_artifactory_instance/artifactory/libs_snapshot'
+      release_url: 'url_to_your_artifactory_instance/artifactory/libs-release'
+      snapshot_url: 'url_to_your_artifactory_instance/artifactory/libs-snapshot'
   # Pipelines
   build:
     service_id: pipeline
