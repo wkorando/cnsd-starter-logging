@@ -18,23 +18,28 @@ stages:
   jobs:
   - name: Maven build & test
     type: builder
-    artifact_dir: ''
-    build_type: maven
+    SERVICE_INSTANCE: (default)
+	SERVICE_INSTANCE_TYPE: artifactory
+    extension_id: ibm.devops.services.pipeline.maven.build.deploy
     enable_tests: true
-    test_file_pattern: target/surefire-reports/TEST-*.xml
+ 
     script: |+
-      #!/bin/bash
-      # set -x
-      echo "Building Java..."
-      echo "Unsetting LOG_DIR env var (used during Java build to check if server started)"
-      echo "LOG_DIR: ${LOG_DIR}"
-      LOG_DIR_TEMP=$LOG_DIR
-      unset LOG_DIR
-      echo "LOG_DIR has been unset: ${LOG_DIR}"
+		#!/bin/bash
+		# environment variables are available:
+		# MAVEN_NAME: name of the service instance
+		# MAVEN_USER_ID: userid for the maven repository
+		# MAVEN_TOKEN: the token or password for the maven repository
+		# MAVEN_SNAPSHOT_URL: the maven snapshot repository
+		# MAVEN_RELEASE_URL: the maven release repository
+		# MAVEN_MIRROR_URL: the maven mirror repository
+		# SONAR_INSTANCE_NAME: the name of the SonarQube instance
+		# SONAR_SERVER_URL: the url of the SonarQube server
+		# SONAR_USER_ID: SonarQube user name
+		# SONAR_USER_TOKEN: SonarQube password or authentication token
+		# The settings.xml is available in $HOME/.m2/settings.xml
+		# The name of the snapshots repository is 'snapshots'
+		# The name of the release repository is 'releases'
+		# The name of the mirror repository is 'central'
 
-      mvn -N io.takari:maven:wrapper -Dmaven=3.5.0
-      ./mvnw install
-
-      echo "Java build finished, setting LOG_DIR back to original"
-      LOG_DIR=$LOG_DIR_TEMP
-      echo "LOG_DIR: ${LOG_DIR}"
+		mvn -B clean package 
+		mvn -DaltDeploymentRepository=snapshots::default::${MAVEN_SNAPSHOT_URL} deploy
